@@ -1,0 +1,3 @@
+[submodule "clib3"]
+	path = clib3
+	url = https://github.com/marco-wehnert/clib3.git
