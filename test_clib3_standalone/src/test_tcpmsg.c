@@ -14,32 +14,26 @@
 #define ENTER_TEST() printf(">>> %*s\n", -40, __func__)
 #define LEAVE_TEST() printf("<<< %*s\n", -40, __func__)
 
+#define LOCALHOST "127.0.0.1"
+#define PORT 29578
+
 void test_tcpmsg_server_create_shutdown()
 {
     int result;
-//    tcpmsg_client_vars_t client_vars;
     tcpmsg_server_vars_t server_vars;
 
     ENTER_TEST();
-//    printf(">>> void test_tcpmsg()\n");
 
-//    client_vars.server_ip = "127.0.0.1";
     ll_init(&server_vars.connections);
-    server_vars.port = 29578;
+    server_vars.port = PORT;
 
     result = TCPMSG_create_server(&server_vars);
     CU_ASSERT_EQUAL(result, 0);
 
-//    result = TCPMSG_connect_client(&client_vars);
-//    sleep(1);
-
     TCPMSG_shutdown_server(&server_vars);
-//    sleep(1);
-
-//    CU_ASSERT_EQUAL(result, 0);
 
     CU_ASSERT_TRUE(true);
-//    printf("<<< void test_tcpmsg()\n");
+
     LEAVE_TEST();
 }
 
@@ -47,20 +41,20 @@ void test_tcpmsg_client_connect_disconnect()
 {
     int result;
     tcpmsg_server_vars_t server_vars;
+    tcpmsg_reader_vars_t client_vars;
 
     ENTER_TEST();
+
     ll_init(&server_vars.connections);
-    server_vars.port = 29578;
+    server_vars.port = PORT;
     result = TCPMSG_create_server(&server_vars);
     CU_ASSERT_EQUAL(result, 0);
 
-    tcpmsg_client_vars_t client_vars;
-    client_vars.server_ip = "127.0.0.1";
-    client_vars.server_port = 29578;
-    result = TCPMSG_connect_client(&client_vars);
+    result = TCPMSG_connect_client(&client_vars, LOCALHOST, PORT);
     CU_ASSERT_EQUAL(result, 0);
+
     CU_ASSERT_NOT_EQUAL(client_vars.socket, 0);
-    usleep(10000);
+    usleep(1000);
     CU_ASSERT_EQUAL(server_vars.connections.count, 1);
 
     usleep(1000);
@@ -80,18 +74,16 @@ void test_tcpmsg_shutdown_with_connection()
 {
     int result;
     tcpmsg_server_vars_t server_vars;
-    tcpmsg_client_vars_t client_vars;
+    tcpmsg_reader_vars_t client_vars;
 
     ENTER_TEST();
 
     ll_init(&server_vars.connections);
-    server_vars.port = 29578;
+    server_vars.port = PORT;
     result = TCPMSG_create_server(&server_vars);
     CU_ASSERT_EQUAL(result, 0);
 
-    client_vars.server_ip = "127.0.0.1";
-    client_vars.server_port = 29578;
-    result = TCPMSG_connect_client(&client_vars);
+    result = TCPMSG_connect_client(&client_vars, LOCALHOST, PORT);
     CU_ASSERT_EQUAL(result, 0);
     CU_ASSERT_NOT_EQUAL(client_vars.socket, 0);
     usleep(10000);
@@ -107,19 +99,19 @@ void test_tcpmsg_write_client_to_server()
 {
     int result;
     tcpmsg_server_vars_t server_vars;
-    tcpmsg_client_vars_t client_vars;
+    tcpmsg_reader_vars_t client_vars;
     tcpmsg_header_t header;
     uint8_t data[100];
 
     ENTER_TEST();
 
     ll_init(&server_vars.connections);
-    server_vars.port = 29578;
+    server_vars.port = PORT;
     result = TCPMSG_create_server(&server_vars);
+    CU_ASSERT_EQUAL(result, 0);
 
-    client_vars.server_ip = "127.0.0.1";
-    client_vars.server_port = 29578;
-    result = TCPMSG_connect_client(&client_vars);
+    result = TCPMSG_connect_client(&client_vars, LOCALHOST, PORT);
+    CU_ASSERT_EQUAL(result, 0);
 
     header.sync_pattern = htons(0x55FF);
     header.msg_type = htons(0x0001);
@@ -130,6 +122,21 @@ void test_tcpmsg_write_client_to_server()
 
     TCPMSG_disconnect_client(&client_vars);
     TCPMSG_shutdown_server(&server_vars);
+
+    LEAVE_TEST();
+}
+
+void test_tcpmsg_client_connect_to_nowhere()
+{
+    int result;
+    tcpmsg_reader_vars_t client_vars;
+
+    ENTER_TEST();
+
+    memset(&client_vars, 0, sizeof(tcpmsg_reader_vars_t));
+
+    result = TCPMSG_connect_client(&client_vars, LOCALHOST, PORT+1);
+    CU_ASSERT_EQUAL(result, -1);
 
     LEAVE_TEST();
 }
@@ -151,6 +158,9 @@ void add_tcpmsg_tests()
     CU_add_test(pSuite,
             "test_tcpmsg_write_client_to_server",
             &test_tcpmsg_write_client_to_server);
+    CU_add_test(pSuite,
+            "test_tcpmsg_client_connect_to_nowhere",
+            &test_tcpmsg_client_connect_to_nowhere);
 }
 
 
