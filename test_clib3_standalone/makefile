@@ -11,7 +11,9 @@ OBJ = src/main.o  \
 	../clib3/src/tcpmsg.o \
 	../clib3/src/tcpmsg_client.o \
 	../clib3/src/tcpmsg_server.o \
-	src/test_tcpmsg.o
+	src/test_tcpmsg.o \
+	../clib3/src/utils.o \
+	src/test_utils.o
 
 
 all: $(OBJ)

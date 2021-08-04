@@ -4,6 +4,7 @@
 #include "test_linked_list.h"
 #include "test_timer.h"
 #include "test_tcpmsg.h"
+#include "test_utils.h"
 
 void test_pass(void)
 {
@@ -39,7 +40,8 @@ int main(int argc, char* argv[])
 //    add_linked_list_tests();
 //    add_timer_tests();
     add_tcpmsg_tests();
-
+//    add_utils_tests();
+//
     CU_basic_set_mode(CU_BRM_NORMAL);
     CU_basic_run_tests();
 
