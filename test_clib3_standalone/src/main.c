@@ -23,7 +23,7 @@ void test_fail(void)
 int main(int argc, char* argv[])
 {
     CU_ErrorCode error_code;
-    CU_pSuite pSuite;
+    //CU_pSuite pSuite;
 
     error_code = CU_initialize_registry();
     if (error_code != CUE_SUCCESS)

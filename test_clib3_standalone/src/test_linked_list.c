@@ -1,6 +1,7 @@
 #include <CUnit/CUnit.h>
 #include "../../clib3/src/linked_list.h"
 #include <stdlib.h>
+#include <stdint.h>
 
 void test_ll_push_front(void)
 {
@@ -16,6 +17,7 @@ void test_ll_push_front(void)
     CU_ASSERT_PTR_EQUAL(ptr_object, ll.front->object);
     CU_ASSERT_PTR_EQUAL(ptr_object, ll.back->object);
     ll_clear(&ll);
+    CU_ASSERT_TRUE(ll.count == 0);
     free(ptr_object);
 }
 
@@ -34,6 +36,7 @@ void test_ll_push_back(void)
     CU_ASSERT_PTR_EQUAL(ptr_object, ll.back->object);
     CU_ASSERT_PTR_EQUAL(ptr_object, ll.front->object);
     ll_clear(&ll);
+    CU_ASSERT_TRUE(ll.count == 0);
     free(ptr_object);
 }
 
@@ -149,6 +152,7 @@ void test_ll_remove_element_count_1_not_matching(void)
     ll_remove(&ll, object_2);
     CU_ASSERT_EQUAL(ll.count, 1);
     ll_clear(&ll);
+    CU_ASSERT_TRUE(ll.count == 0);
 }
 
 void test_ll_remove_element_count_1_matching(void)
@@ -180,6 +184,7 @@ void test_ll_remove_element_count_2_not_matching(void)
     ll_remove(&ll, object_3);
     CU_ASSERT_EQUAL(ll.count, 2);
     ll_clear(&ll);
+    CU_ASSERT_TRUE(ll.count == 0);
 }
 
 void test_ll_remove_element_count_2_matching_front(void)
@@ -199,6 +204,7 @@ void test_ll_remove_element_count_2_matching_front(void)
     CU_ASSERT_EQUAL(ll.count, 1);
     CU_ASSERT_EQUAL(ll.front->object, object_2);
     ll_clear(&ll);
+    CU_ASSERT_TRUE(ll.count == 0);
 }
 
 void test_ll_remove_element_count_2_matching_back(void)
@@ -218,6 +224,7 @@ void test_ll_remove_element_count_2_matching_back(void)
     CU_ASSERT_EQUAL(ll.count, 1);
     CU_ASSERT_EQUAL(ll.front->object, object_1);
     ll_clear(&ll);
+    CU_ASSERT_TRUE(ll.count == 0);
 }
 
 void test_ll_remove_element_count_3_matching(void)
@@ -260,34 +267,89 @@ void test_ll_remove_element_count_3_not_matching(void)
     CU_ASSERT_EQUAL(ll.front->next->object, object_2);
     CU_ASSERT_EQUAL(ll.back->prev->object, object_2);
     ll_clear(&ll);
+    CU_ASSERT_TRUE(ll.count == 0);
+}
+
+bool is_even(void* number)
+{
+    if (((uintptr_t)number) % 2 == 0)
+    {
+        return true;
+    }
+    else
+    {
+        return  false;
+    }
+}
+
+void test_ll_remove_all_123()
+{
+    linked_list_t ll;
+    ll_init(&ll);
+    void* object_1 = (void*) 1;
+    void* object_2 = (void*) 2;
+    void* object_3 = (void*) 3;
+
+    ll_push_back(&ll, object_1);
+    ll_push_back(&ll, object_2);
+    ll_push_back(&ll, object_3);
+
+    ll_remove_all(&ll, &is_even);
+    CU_ASSERT_EQUAL(ll.count, 2);
+    CU_ASSERT_PTR_EQUAL(ll.front->next, ll.back);
+    ll_clear(&ll);
+    CU_ASSERT_EQUAL(ll.count, 0);
+}
+
+void test_ll_remove_all_214()
+{
+    linked_list_t ll;
+    ll_init(&ll);
+    void* object_1 = (void*) 2;
+    void* object_2 = (void*) 1;
+    void* object_3 = (void*) 4;
+
+    ll_push_back(&ll, object_1);
+    ll_push_back(&ll, object_2);
+    ll_push_back(&ll, object_3);
+
+    ll_remove_all(&ll, &is_even);
+    CU_ASSERT_EQUAL(ll.count, 1);
+    CU_ASSERT_PTR_EQUAL(ll.front->next, NULL);
+    CU_ASSERT_PTR_EQUAL(ll.back->prev, NULL);
+    ll_clear(&ll);
+    CU_ASSERT_EQUAL(ll.count, 0);
 
 }
 
-
 void add_linked_list_tests()
-{   
+{
     CU_pSuite pSuite;
 
     pSuite = CU_add_suite("linked_list", NULL, NULL);
-    CU_add_test(pSuite, "test_ll_push_front", &test_ll_push_front);
-    CU_add_test(pSuite, "test_ll_push_back", &test_ll_push_back);
-    CU_add_test(pSuite, "test_ll_push_pop_front", &test_ll_push_pop_front);
-    CU_add_test(pSuite, "test_ll_push_pop_back", &test_ll_push_pop_back);
-    CU_add_test(pSuite, "test_ll_remove_element_count_0",
-            &test_ll_remove_element_count_0);
-    CU_add_test(pSuite, "test_ll_remove_element_count_1_matching",
-            &test_ll_remove_element_count_1_matching);
-    CU_add_test(pSuite, "test_ll_remove_element_count_1_not_matching",
-            &test_ll_remove_element_count_1_not_matching);
-    CU_add_test(pSuite, "test_ll_remove_element_count_2_not_matching",
-            &test_ll_remove_element_count_2_not_matching);
-    CU_add_test(pSuite, "test_ll_remove_element_count_2_matching_front",
-            &test_ll_remove_element_count_2_matching_front);
-    CU_add_test(pSuite, "test_ll_remove_element_count_2_matching_back",
-            &test_ll_remove_element_count_2_matching_back);
-    CU_add_test(pSuite, "test_ll_remove_element_count_3_matching",
-            &test_ll_remove_element_count_3_matching);
-    CU_add_test(pSuite, "test_ll_remove_element_count_3_not_matching",
-            &test_ll_remove_element_count_3_not_matching);
+//    CU_add_test(pSuite, "test_ll_push_front", &test_ll_push_front);
+//    CU_add_test(pSuite, "test_ll_push_back", &test_ll_push_back);
+//    CU_add_test(pSuite, "test_ll_push_pop_front", &test_ll_push_pop_front);
+//    CU_add_test(pSuite, "test_ll_push_pop_back", &test_ll_push_pop_back);
+//    CU_add_test(pSuite, "test_ll_remove_element_count_0",
+//            &test_ll_remove_element_count_0);
+//    CU_add_test(pSuite, "test_ll_remove_element_count_1_matching",
+//            &test_ll_remove_element_count_1_matching);
+//    CU_add_test(pSuite, "test_ll_remove_element_count_1_not_matching",
+//            &test_ll_remove_element_count_1_not_matching);
+//    CU_add_test(pSuite, "test_ll_remove_element_count_2_not_matching",
+//            &test_ll_remove_element_count_2_not_matching);
+//    CU_add_test(pSuite, "test_ll_remove_element_count_2_matching_front",
+//            &test_ll_remove_element_count_2_matching_front);
+//    CU_add_test(pSuite, "test_ll_remove_element_count_2_matching_back",
+//            &test_ll_remove_element_count_2_matching_back);
+//    CU_add_test(pSuite, "test_ll_remove_element_count_3_matching",
+//            &test_ll_remove_element_count_3_matching);
+//    CU_add_test(pSuite, "test_ll_remove_element_count_3_not_matching",
+//            &test_ll_remove_element_count_3_not_matching);
+    CU_add_test(pSuite, "test_ll_remove_all_123",
+            &test_ll_remove_all_123);
+    CU_add_test(pSuite, "test_ll_remove_all_214",
+            &test_ll_remove_all_214);
 
 }
