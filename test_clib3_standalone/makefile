@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -I src
+CFLAGS = -g -Wall -I src
 LDFLAGS = -pthread -lcunit
 TARGET = test_clib3_standalone
 
